@@ -21,3 +21,5 @@ target
 #.idea/
 
 **/__pycache__/
+build/
+shotgun.egg-info/
