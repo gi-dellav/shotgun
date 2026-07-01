@@ -1,0 +1,16 @@
+[matrix]
+homeserver = "https://matrix.example.org"
+user_id = "@bot:example.org"
+access_token = "syt_xxxxxxxxxx"
+# access_token_env = "SHOTGUN_ACCESS_TOKEN"
+
+[zerostack]
+permission = "read-only"  # "yolo" or "read-only"
+# provider = "openrouter"
+# model = "anthropic/claude-sonnet-4"
+# prompt = "code"
+# extra_args = []
+
+[filters]
+allowlist = []  # empty = allow all
+denylist = []   # checked after allowlist
