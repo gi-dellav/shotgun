@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import os
 import sys
 from dataclasses import dataclass, field
@@ -9,6 +10,8 @@ try:
     import tomllib
 except ImportError:
     import tomli as tomllib  # type: ignore[no-redef]
+
+logger = logging.getLogger("shotgun")
 
 
 @dataclass
@@ -48,8 +51,8 @@ def load_config(path: Path | None = None) -> ShotgunConfig:
         path = Path("shotgun.toml")
 
     if not path.exists():
-        print(f"Config file not found: {path}", file=sys.stderr)
-        print("Create a shotgun.toml or pass --config <path>", file=sys.stderr)
+        logger.error("Config file not found: %s", path)
+        logger.error("Create a shotgun.toml or pass --config <path>")
         sys.exit(1)
 
     with open(path, "rb") as f:
@@ -63,13 +66,13 @@ def load_config(path: Path | None = None) -> ShotgunConfig:
     if token_env:
         access_token = os.environ.get(token_env, "")
         if not access_token:
-            print(f"Environment variable {token_env} is not set", file=sys.stderr)
+            logger.error("Environment variable %s is not set", token_env)
             sys.exit(1)
     else:
         access_token = matrix_raw.get("access_token", "")
 
     if not access_token:
-        print("No access_token or access_token_env configured", file=sys.stderr)
+        logger.error("No access_token or access_token_env configured")
         sys.exit(1)
 
     matrix = MatrixConfig(
@@ -81,7 +84,7 @@ def load_config(path: Path | None = None) -> ShotgunConfig:
     zs_raw = raw.get("zerostack", {})
     perm = zs_raw.get("permission", "read-only")
     if perm not in ("yolo", "read-only"):
-        print(f"Invalid zerostack.permission: {perm}. Use 'yolo' or 'read-only'", file=sys.stderr)
+        logger.error("Invalid zerostack.permission: %s. Use 'yolo' or 'read-only'", perm)
         sys.exit(1)
 
     zerostack = ZerostackConfig(
@@ -101,7 +104,7 @@ def load_config(path: Path | None = None) -> ShotgunConfig:
     dm_raw = raw.get("dm", {})
     allow_dm = dm_raw.get("allow", True)
     if not isinstance(allow_dm, bool):
-        print(f"Invalid dm.allow: {allow_dm}. Must be true or false", file=sys.stderr)
+        logger.error("Invalid dm.allow: %s. Must be true or false", allow_dm)
         sys.exit(1)
 
     zerostack_dm = None
@@ -109,7 +112,7 @@ def load_config(path: Path | None = None) -> ShotgunConfig:
         zs_dm_raw = dm_raw["zerostack"]
         perm_dm = zs_dm_raw.get("permission", "read-only")
         if perm_dm not in ("yolo", "read-only"):
-            print(f"Invalid dm.zerostack.permission: {perm_dm}. Use 'yolo' or 'read-only'", file=sys.stderr)
+            logger.error("Invalid dm.zerostack.permission: %s. Use 'yolo' or 'read-only'", perm_dm)
             sys.exit(1)
         zerostack_dm = ZerostackConfig(
             permission=perm_dm,

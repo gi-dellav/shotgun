@@ -28,12 +28,15 @@ def main() -> None:
     logging.basicConfig(level=level, format="%(asctime)s %(levelname)s %(message)s")
 
     config = load_config(args.config)
+    logger = logging.getLogger("shotgun")
+    logger.info("Starting Shotgun bot, homeserver=%s user=%s", config.matrix.homeserver, config.matrix.user_id)
+
     bot = ShotgunBot(config)
 
     try:
         asyncio.run(bot.start())
     except KeyboardInterrupt:
-        pass
+        logger.info("Shutting down")
 
 
 if __name__ == "__main__":
