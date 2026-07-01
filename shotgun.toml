@@ -14,3 +14,15 @@ permission = "read-only"  # "yolo" or "read-only"
 [filters]
 allowlist = []  # empty = allow all
 denylist = []   # checked after allowlist
+
+[dm]
+allow = true
+
+# [dm.zerostack]
+# permission = "yolo"  # override zerostack for DM instances
+# provider = "openrouter"
+# model = "anthropic/claude-sonnet-4"
+
+# [dm.filters]
+# allowlist = []
+# denylist = []

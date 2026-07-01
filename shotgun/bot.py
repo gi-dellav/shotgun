@@ -66,7 +66,8 @@ class ShotgunBot:
         await self._send_reply(room, event, f"{PREFIX} Agent started")
         self._own_events.add(event.event_id)
 
-        output, success = await run_agent(event.body, self.config.zerostack)
+        zs_config = self.config.zerostack_dm if self._is_dm(room, event) and self.config.zerostack_dm else self.config.zerostack
+        output, success = await run_agent(event.body, zs_config)
         if success:
             await self._send_reply(room, event, output)
         else:
@@ -107,15 +108,16 @@ class ShotgunBot:
 
     def _should_respond(self, room: MatrixRoom, event: RoomMessageText) -> bool:
         sender = event.sender
-        filters = self.config.filters
+        is_dm = self._is_dm(room, event)
+        filters = self.config.filters_dm if is_dm and self.config.filters_dm else self.config.filters
 
         if filters.denylist and sender in filters.denylist:
             return False
         if filters.allowlist and sender not in filters.allowlist:
             return False
 
-        if self._is_dm(room, event):
-            return True
+        if is_dm:
+            return self.config.allow_dm
         if self._is_mentioned(event):
             return True
         if self._is_reply_to_bot(event):

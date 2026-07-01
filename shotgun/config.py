@@ -38,6 +38,9 @@ class ShotgunConfig:
     matrix: MatrixConfig
     zerostack: ZerostackConfig
     filters: FiltersConfig
+    allow_dm: bool = True
+    zerostack_dm: ZerostackConfig | None = None
+    filters_dm: FiltersConfig | None = None
 
 
 def load_config(path: Path | None = None) -> ShotgunConfig:
@@ -95,8 +98,40 @@ def load_config(path: Path | None = None) -> ShotgunConfig:
         denylist=filters_raw.get("denylist", []),
     )
 
+    dm_raw = raw.get("dm", {})
+    allow_dm = dm_raw.get("allow", True)
+    if not isinstance(allow_dm, bool):
+        print(f"Invalid dm.allow: {allow_dm}. Must be true or false", file=sys.stderr)
+        sys.exit(1)
+
+    zerostack_dm = None
+    if "zerostack" in dm_raw:
+        zs_dm_raw = dm_raw["zerostack"]
+        perm_dm = zs_dm_raw.get("permission", "read-only")
+        if perm_dm not in ("yolo", "read-only"):
+            print(f"Invalid dm.zerostack.permission: {perm_dm}. Use 'yolo' or 'read-only'", file=sys.stderr)
+            sys.exit(1)
+        zerostack_dm = ZerostackConfig(
+            permission=perm_dm,
+            provider=zs_dm_raw.get("provider"),
+            model=zs_dm_raw.get("model"),
+            prompt=zs_dm_raw.get("prompt"),
+            extra_args=zs_dm_raw.get("extra_args", []),
+        )
+
+    filters_dm = None
+    if "filters" in dm_raw:
+        f_dm_raw = dm_raw["filters"]
+        filters_dm = FiltersConfig(
+            allowlist=f_dm_raw.get("allowlist", []),
+            denylist=f_dm_raw.get("denylist", []),
+        )
+
     return ShotgunConfig(
         matrix=matrix,
         zerostack=zerostack,
         filters=filters,
+        allow_dm=allow_dm,
+        zerostack_dm=zerostack_dm,
+        filters_dm=filters_dm,
     )
